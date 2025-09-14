@@ -1,0 +1,11 @@
+# Web framework
+flask==3.0.3
+flask-cors==4.0.0
+
+# Database & ORM
+peewee==3.17.1
+psycopg2-binary==2.9.9
+python-dotenv==1.0.1
+
+# HTTP requests
+requests==2.32.3
