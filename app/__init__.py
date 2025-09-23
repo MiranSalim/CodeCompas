@@ -1,4 +1,3 @@
-from flask_cors.extension import CORS
 from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -6,19 +5,25 @@ from dotenv import load_dotenv
 from .config import Config
 from .models import create_tables
 from .db import db
+from .controllers.login_controller import auth_bp
+from .controllers.register_controller import register_bp
+from .controllers.debug_controller import debug_bp
+
+
+load_dotenv()  # zorg dat .env geladen is
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    origins = app.config.get("CORS_ORIGINS", ["http://localhost:5000"])
-    CORS(app,
-         resources={r"/api/*": {"origins": origins}},
-         supports_credentials=True)
+    # ✅ CORS configuratie
+    CORS(
+        app,
+        resources={r"/api/*": {"origins": ["http://localhost:5173"]}},
+        supports_credentials=True
+    )
 
-    from .routes.auth import auth_bp
-    app.register_blueprint(auth_bp, url_prefix="/api")
-
+    # ✅ Database connectie hooks
     @app.before_request
     def _db_connect():
         if db.is_closed():
@@ -36,5 +41,10 @@ def create_app():
     @app.route("/api/ping")
     def ping():
         return {"ok": True}
+
+    # ✅ Blueprints
+    app.register_blueprint(auth_bp, url_prefix="/api")
+    app.register_blueprint(register_bp, url_prefix="/api")
+    app.register_blueprint(debug_bp, url_prefix="/api")
 
     return app
