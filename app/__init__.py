@@ -1,11 +1,10 @@
-from flask_cors.extension import CORS
 from flask import Flask
 from flask_cors import CORS
-from dotenv import load_dotenv
 
 from .config import Config
-from .models import create_tables
+from .models import create_tables, ensure_profile_id_autoincrement
 from .db import db
+
 
 def create_app():
     app = Flask(__name__)
@@ -14,10 +13,17 @@ def create_app():
     origins = app.config.get("CORS_ORIGINS", ["http://localhost:5000"])
     CORS(app,
          resources={r"/api/*": {"origins": origins}},
-         supports_credentials=True)
+         supports_credentials=True,
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+         allow_headers=["Content-Type", "Authorization"],
+    )
 
-    from .routes.auth import auth_bp
-    app.register_blueprint(auth_bp, url_prefix="/api")
+    from .routes.login_controller import login_bp
+    from .routes.register_controller import register_bp
+    from .routes.users_controller import users_bp
+    app.register_blueprint(login_bp, url_prefix="/api")
+    app.register_blueprint(register_bp, url_prefix="/api")
+    app.register_blueprint(users_bp, url_prefix="/api")
 
     @app.before_request
     def _db_connect():
@@ -32,6 +38,7 @@ def create_app():
     # ✅ maak tabellen bij startup
     with app.app_context():
         create_tables()
+        ensure_profile_id_autoincrement()
 
     @app.route("/api/ping")
     def ping():

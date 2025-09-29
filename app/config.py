@@ -2,8 +2,10 @@ import os
 from dotenv import load_dotenv
 load_dotenv()  # laad .env automatisch
 
+
 def _str_to_bool(s: str) -> bool:
     return str(s).lower() in ("1", "true", "yes")
+
 
 class Config:
     # JWT / cookie
@@ -11,9 +13,13 @@ class Config:
     COOKIE_NAME = os.getenv("COOKIE_NAME", "session")
     COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN", "localhost")
     COOKIE_SECURE = _str_to_bool(os.getenv("COOKIE_SECURE", "False"))
+    COOKIE_SAMESITE = os.getenv("COOKIE_SAMESITE", "None")  # None|Lax|Strict
 
-    # CORS - comma separated in .env, default naar localhost:3000
-    CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+    # CORS - comma separated in .env
+    CORS_ORIGINS = os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000",
+    ).split(",")
 
     # Supabase (wordt uit .env gelezen)
     SUPABASE_URL = os.getenv("SUPABASE_URL")
